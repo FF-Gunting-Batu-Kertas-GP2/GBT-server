@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
     player.push(payload);
     currentPlayer.push(payload);
     socket.emit("S_sendName", payload);
+    socket.emit('allPlayers', player)
   });
 
   socket.on("C_getReady", (payload) => {
