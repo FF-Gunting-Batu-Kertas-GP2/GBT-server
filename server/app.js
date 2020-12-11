@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
     player.push(payload);
     currentPlayer.push(payload);
     socket.emit("S_sendName", payload);
+    socket.emit('allPlayers', player)
   });
 
   socket.on("C_getReady", (payload) => {
@@ -53,6 +54,7 @@ io.on("connection", (socket) => {
 checkPlayer = setInterval(checkAllPlayer, 1000);
 
 function checkAllPlayer() {
+  console.log(player)
   console.log(player.length);
 
   if (player.length > 1) {
