@@ -4,8 +4,10 @@ const io = require("socket.io")(server);
 const port = process.env.PORT || 3000;
 
 const player = [];
+let currentPlayer = [];
 let round = [];
 let gameStatus = false;
+let gameDone = false;
 let checkPlayer;
 let readyInit;
 let playerLose;
@@ -15,25 +17,31 @@ let roundEnd = false;
 io.on("connection", (socket) => {
   console.log("Socket.io client connected");
 
-  // firstPlayer = setInterval(checkPlayerJoined, 1000);
-  // gameInterval = setInterval(checkGameStatus, 1000);
   roundStatus = setInterval(checkRound, 50);
-  playerLose = setInterval(checkPlayerLose, 50);
+  setWinner = setInterval(finish, 1000);
 
   function checkRound() {
     if (roundEnd == true) {
       console.log("kirim data");
-      console.log(round);
+      checkPlayerLose();
       io.emit("S_sendPlayerData", round);
       roundEnd = false;
       round = [];
       gameInit();
     }
   }
+  function finish() {
+    if (gameDone == true) {
+      console.log("game selesai", currentPlayer);
+      io.emit("S_sendWinner", currentPlayer);
+      gameDone = false;
+    }
+  }
 
   // Player name from client
   socket.on("C_sendName", (payload) => {
     player.push(payload);
+    currentPlayer.push(payload);
     const data = {
       payload: payload,
       player: player
@@ -60,6 +68,7 @@ function checkAllPlayer() {
 }
 
 function gameInit() {
+  checkGameFinish();
   console.log("game mulai");
   gameStatus = true;
   readyInit = setInterval(checkReady, 1000);
@@ -116,25 +125,39 @@ function startRound() {
 }
 
 function checkReady() {
+  console.log(currentPlayer);
   console.log(round);
-  console.log(player.length);
   let playerReady = 0;
   for (let i = 0; i < round.length; i++) {
     if (round[i].readyStatus == true) {
       playerReady++;
     }
   }
-  if (playerReady == player.length) {
+  if (playerReady == currentPlayer.length) {
     startRound();
     clearInterval(readyInit);
   }
 }
 
 function checkPlayerLose() {
+  let nextRoundPlayer = [];
+
   for (let i = 0; i < round.length; i++) {
-    if (round[i].health <= 0) {
-      round[i].lose = true;
+    if (round[i].health > 0) {
+      nextRoundPlayer.push({
+        id: round[i].id,
+        name: round[i].name,
+      });
     }
+  }
+  currentPlayer = nextRoundPlayer;
+}
+
+function checkGameFinish() {
+  if (currentPlayer.length == 1) {
+    gameStatus = false;
+    gameDone = true;
+    clearInterval(readyInit);
   }
 }
 
