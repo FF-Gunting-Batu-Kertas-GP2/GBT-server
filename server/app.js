@@ -54,6 +54,7 @@ io.on("connection", (socket) => {
 checkPlayer = setInterval(checkAllPlayer, 1000);
 
 function checkAllPlayer() {
+  console.log(player)
   console.log(player.length);
 
   if (player.length > 1) {
