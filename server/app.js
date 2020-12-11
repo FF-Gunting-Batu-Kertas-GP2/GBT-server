@@ -34,7 +34,12 @@ io.on("connection", (socket) => {
   // Player name from client
   socket.on("C_sendName", (payload) => {
     player.push(payload);
-    socket.emit("S_sendName", payload);
+    const data = {
+      payload: payload,
+      player: player
+    }
+    io.emit("S_sendName", data);
+    console.log(payload, '<<emit S_sendName')
   });
 
   socket.on("C_getReady", (payload) => {
@@ -45,6 +50,7 @@ io.on("connection", (socket) => {
 checkPlayer = setInterval(checkAllPlayer, 1000);
 
 function checkAllPlayer() {
+  console.log(player)
   console.log(player.length);
 
   if (player.length > 1) {
